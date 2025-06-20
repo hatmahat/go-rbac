@@ -122,6 +122,45 @@ app.Use(func(c *fiber.Ctx) error {
 })
 ```
 
+## 🛡️ Checking Privileges in Your Handlers
+Once you’ve injected RBAC context using InjectContext, you can retrieve and use the privileges easily:
+```go
+ctx := c.Request().Context()
+
+privs, ok := rbac.GetPrivilegesFromContext(ctx)
+if !ok || !privs["read:compliance"] {
+    return c.JSON(http.StatusForbidden, map[string]string{"error": "forbidden"})
+}
+
+userID, _ := rbac.GetUserIDFromContext(ctx)
+return c.JSON(http.StatusOK, map[string]string{
+    "message": fmt.Sprintf("Hello user %s! You have access.", userID),
+})
+```
+### ✅ Built-in Context Helpers:
+
+| Function                                 | Purpose                                     |
+|------------------------------------------|---------------------------------------------|
+| `rbac.GetPrivilegesFromContext(ctx)`     | Returns map of granted privileges           |
+| `rbac.HasPrivilegeInContext(ctx, code)`  | Shorthand to check a specific privilege     |
+| `rbac.GetUserIDFromContext(ctx)`         | Retrieve user ID from context               |
+| `rbac.GetRoleIDFromContext(ctx)`         | Retrieve role ID from context               |
+
+### 🔁 Example in Business Logic Layer (Service)
+```go
+func (s *YourService) GetData(ctx context.Context) error {
+    if !rbac.HasPrivilegeInContext(ctx, "read:data") {
+        return fmt.Errorf("forbidden")
+    }
+
+    userID, _ := rbac.GetUserIDFromContext(ctx)
+    fmt.Println("Fetching data for user:", userID)
+
+    // continue processing...
+}
+```
+
+
 ## 🧪 Example: Run Locally
 ### Step 1: Clone and run the example
 ```bash
