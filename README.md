@@ -42,7 +42,7 @@ go-rbac/
 ## 🚀 Quick Start 
 ### Step 1: Initialize RBAC service
 ```go
-import "github.com/yourusername/go-rbac/rbac"
+import "github.com/hatmahat/go-rbac/rbac"
 
 rbacService := rbac.NewRBACService(db, 1*time.Minute)
 ```
