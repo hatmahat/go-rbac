@@ -83,7 +83,7 @@ import (
 	"time"
 
     "github.com/hatmahat/go-rbac/rbac"
-	"github.com/hatmahat/go-rbac/rbacgorm"
+    "github.com/hatmahat/go-rbac/rbacgorm"
 )
 
 repo := rbacgorm.NewGormPrivilegeRepository(db)
