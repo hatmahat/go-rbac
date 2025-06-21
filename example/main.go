@@ -32,8 +32,11 @@ func main() {
 	db := initDB()
 	seedData(db)
 
+	// ✅ Create the GORM-based privilege repository
+	privRepo := rbac.NewGormPrivilegeRepository(db)
+
 	// 2. Initialize RBAC service with 1-minute auto-refresh
-	rbacService := rbac.NewRBACService(db, 1*time.Minute)
+	rbacService := rbac.NewRBACService(privRepo, 1*time.Minute)
 
 	// 3. Setup Echo
 	e := echo.New()

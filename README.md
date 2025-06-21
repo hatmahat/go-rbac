@@ -5,16 +5,16 @@ A lightweight, framework-agnostic **Role-Based Access Control (RBAC)** library f
 - ✅ Context-based privilege injection
 - ✅ In-memory caching for fast access
 - ✅ Optional auto-refresh of role privileges
-- ✅ Minimal dependency (works with any HTTP framework)
+- ✅ Minimal dependency (works with any HTTP framework or DB driver)
 
 ---
 
 ## ✨ Features
 
 - No framework lock-in (works with Echo, Gin, Chi, Fiber, etc.)
+- Decoupled data layer — bring your own database via PrivilegeRepository ⭐️
 - Simple API: `HasPrivilege`, `GetRolePrivileges`, `InjectContext`
-- Built-in GORM query layer
-- Middleware helpers available for Echo or custom HTTP setups
+- Optional GORM-based implementation provided
 
 ---
 
@@ -27,24 +27,32 @@ go get github.com/hatmahat/go-rbac
 ## 🧱 Folder Structure
 ```
 go-rbac/
-├── rbac/               # Core RBAC logic (framework-agnostic)
+├── rbac/                       # Core RBAC logic (framework-agnostic)
 │   ├── cache.go
 │   ├── context.go
 │   ├── context_injector.go
-│   ├── query.go
 │   ├── service.go
-├── example/            # Minimal example using Echo
+│   ├── privilege_repository.go ⭐️ Interface for your own DB logic
+│   └── gorm_repository.go      ⭐️ GORM-based default implementation (optional)
+├── example/                    # Minimal example using Echo
 │   └── main.go
 ├── go.mod
 └── README.md
 ```
 
 ## 🚀 Quick Start 
-### Step 1: Initialize RBAC service
+### Step 1: Implement your own PrivilegeRepository
+Use the built-in GORM repo:
 ```go
-import "github.com/hatmahat/go-rbac/rbac"
-
-rbacService := rbac.NewRBACService(db, 1*time.Minute)
+repo := rbac.NewGormPrivilegeRepository(db)
+rbacService := rbac.NewRBACService(repo, 5*time.Minute)
+```
+Or create your own:
+```go
+type MyRepo struct{}
+func (m *MyRepo) FetchPrivilegesByRoleID(ctx context.Context, roleID string) (map[string]bool, error) {
+	return map[string]bool{"read:compliance": true}, nil // mock or custom DB logic
+}
 ```
 ### Step 2: Inject into context 
 #### Examples
@@ -191,7 +199,7 @@ curl -H "X-Role-ID: guest" -H "X-User-ID: 456" http://localhost:8080/compliance
 ```
 
 ## 🔧 Configuring Privileges
-This package expects the following schema (you can adjust as needed):
+You can use any data source. If you’re using SQL, this is the expected schema for the GORM example:
 ```sql
 CREATE TABLE privileges (
   id TEXT PRIMARY KEY,
@@ -204,9 +212,10 @@ CREATE TABLE role_privileges (
   privilege_id TEXT NOT NULL
 );
 ```
-You may modify FetchRolePrivileges() in query.go if your schema differs.
+Or define your own structure by implementing PrivilegeRepository.
 
 ## 🧰 Built-in Helpers
 - InjectContext(ctx, roleID, userID, privileges)
 - GetPrivilegesFromContext(ctx)
 - HasPrivilegeInContext(ctx, "priv-code")
+- PrivilegeRepository ⭐️ (interface to support custom backends)

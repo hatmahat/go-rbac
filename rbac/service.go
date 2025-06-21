@@ -5,7 +5,6 @@ import (
 	"time"
 
 	logger "github.com/hatmahat/go-rbac/logger"
-	"gorm.io/gorm"
 )
 
 type RBACService interface {
@@ -17,14 +16,14 @@ type RBACService interface {
 }
 
 type rbacService struct {
-	db    *gorm.DB
+	repo  PrivilegeRepository // decoupled abstraction
 	cache *RolePrivilegesCache
 }
 
 // NewRBACService creates a new RBAC service
-func NewRBACService(db *gorm.DB, refreshInterval time.Duration) RBACService {
+func NewRBACService(repo PrivilegeRepository, refreshInterval time.Duration) RBACService {
 	service := &rbacService{
-		db:    db,
+		repo:  repo,
 		cache: NewRolePrivilegesCache(),
 	}
 
@@ -40,7 +39,7 @@ func NewRBACService(db *gorm.DB, refreshInterval time.Duration) RBACService {
 // and caches them
 func (s *rbacService) loadRolePrivileges(ctx context.Context, roleID string) (map[string]bool, error) {
 
-	privileges, err := FetchRolePrivileges(ctx, s.db, roleID)
+	privileges, err := s.repo.FetchPrivilegesByRoleID(ctx, roleID)
 	if err != nil {
 		return nil, err
 	}
