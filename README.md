@@ -244,15 +244,6 @@ return c.JSON(http.StatusOK, map[string]string{
     "message": fmt.Sprintf("Hello user %s! You have access.", userID),
 })
 ```
-### ✅ Built-in Context Helpers:
-
-| Function                                 | Purpose                                     |
-|------------------------------------------|---------------------------------------------|
-| `rbac.GetPrivilegesFromContext(ctx)`     | Returns map of granted privileges           |
-| `rbac.HasPrivilegeInContext(ctx, code)`  | Shorthand to check a specific privilege     |
-| `rbac.GetUserIDFromContext(ctx)`         | Retrieve user ID from context               |
-| `rbac.GetRoleIDFromContext(ctx)`         | Retrieve role ID from context               |
-
 ### 🔁 Example in Business Logic Layer (Service)
 ```go
 func (s *YourService) GetData(ctx context.Context) error {
@@ -267,6 +258,15 @@ func (s *YourService) GetData(ctx context.Context) error {
 }
 ```
 
+
+### ✅ Built-in Context Helpers:
+
+| Function                                 | Purpose                                     |
+|------------------------------------------|---------------------------------------------|
+| `rbac.GetPrivilegesFromContext(ctx)`     | Returns map of granted privileges           |
+| `rbac.HasPrivilegeInContext(ctx, code)`  | Shorthand to check a specific privilege     |
+| `rbac.GetUserIDFromContext(ctx)`         | Retrieve user ID from context               |
+| `rbac.GetRoleIDFromContext(ctx)`         | Retrieve role ID from context               |
 
 ## 🧪 Example: Run Locally
 ### Step 1: Clone and run the example
