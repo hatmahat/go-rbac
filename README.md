@@ -28,7 +28,7 @@ A lightweight, framework-agnostic **Role-Based Access Control (RBAC)** library f
 ## Installation
 
 ```bash
-go get github.com/hatmahat/go-rbac
+go get github.com/hatmahat/go-rbac/rbac
 ```
 
 ## Folder Structure
