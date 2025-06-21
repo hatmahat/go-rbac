@@ -13,7 +13,7 @@ A lightweight, framework-agnostic **Role-Based Access Control (RBAC)** library f
 ## ✨ Features
 
 - No framework lock-in (works with Echo, Gin, Chi, Fiber, etc.)
-- Decoupled data layer — bring your own database via PrivilegeRepository ⭐️
+- Decoupled data layer — bring your own database via PrivilegeRepository 
 - Simple API: `HasPrivilege`, `GetRolePrivileges`, `InjectContext`
 - Optional GORM-based implementation provided
 - Includes built-in RBACService with cache and auto-refresh support
@@ -36,7 +36,7 @@ go-rbac/
 │   ├── context.go              # Context keys and access helpers
 │   ├── injector.go             # Inject privileges into context
 │   ├── logger.go               # Optional logger (Console or Null)
-│   ├── privilege_repository.go # Interface for custom DB repositories ⭐️
+│   ├── privilege_repository.go # Interface for custom DB repositories 
 │   └── service.go              # Main RBAC service logic
 ├── rbacgorm/                   # Optional GORM-based implementation
 │   └── gorm_repository.go
@@ -292,7 +292,7 @@ func (s *YourService) GetData(ctx context.Context) error {
 | `rbac.GetRoleIDFromContext(ctx)`                      | Retrieves role ID from context (if injected earlier)            |
 | `rbac.InjectContext(ctx, roleID, userID, privileges)` | Injects role ID, user ID, and privileges into request context   |
 
-## 🧪 Example: Run Locally
+## Example: Run Locally
 ### Step 1: Clone and run the example
 ```bash
 git clone https://github.com/hatmahat/go-rbac.git
@@ -310,7 +310,7 @@ curl -H "X-Role-ID: admin" -H "X-User-ID: 123" http://localhost:8080/compliance
   "message": "Hello user 123! You have access."
 }
 ```
-#### ❌ Role without Access
+#### Role without Access
 ```bash
 curl -H "X-Role-ID: guest" -H "X-User-ID: 456" http://localhost:8080/compliance
 ```
@@ -321,7 +321,7 @@ curl -H "X-Role-ID: guest" -H "X-User-ID: 456" http://localhost:8080/compliance
 }
 ```
 
-## 🔧 Configuring Privileges
+## Configuring Privileges
 You can use any data source. If you’re using SQL, this is the expected schema for the GORM example:
 ```sql
 CREATE TABLE privileges (
