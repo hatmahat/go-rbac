@@ -82,10 +82,11 @@ The system treats them as simple string lookups for fast in-memory evaluation.
 import (
 	"time"
 
-	"github.com/hatmahat/go-rbac/rbac"
+    "github.com/hatmahat/go-rbac/rbac"
+	"github.com/hatmahat/go-rbac/rbacgorm"
 )
 
-repo := rbac.NewGormPrivilegeRepository(db)
+repo := rbacgorm.NewGormPrivilegeRepository(db)
 rbacService := rbac.NewRBACService(repo, 5*time.Minute, rbac.NewConsoleLogger()) // optional logger
 ```
 #### Option B: Create your own repository (e.g. using database/sql)
