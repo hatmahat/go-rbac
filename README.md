@@ -15,6 +15,7 @@ A lightweight, framework-agnostic **Role-Based Access Control (RBAC)** library f
 - Decoupled data layer — bring your own database via PrivilegeRepository ⭐️
 - Simple API: `HasPrivilege`, `GetRolePrivileges`, `InjectContext`
 - Optional GORM-based implementation provided
+- Includes built-in RBACService with cache and auto-refresh support
 
 ---
 
@@ -228,6 +229,27 @@ app.Use(func(c *fiber.Ctx) error {
     return c.Next()
 })
 ```
+### 🧠 About RBACService
+
+The core `RBACService` handles:
+- In-memory caching of privileges per role
+- Auto-refreshing cache (if interval > 0)
+- Fast lookups with `HasPrivilege`, `HasAnyPrivilege`, etc.
+
+You don't need to manage caching or database access manually — just implement `PrivilegeRepository` and call `NewRBACService(...)`.
+### 🧠 RBACService Interface
+
+The `RBACService` is the core entry point for working with roles and privileges. It provides cache-aware methods for checking access and managing privilege data:
+
+| Function | Purpose |
+|----------|-------------|
+| `GetRolePrivileges(ctx, roleID)` | Returns all privilege codes assigned to a given role. Uses in-memory cache if available. |
+| `HasPrivilege(ctx, roleID, privilege)` | Checks whether the given role has a specific privilege. Returns a boolean. |
+| `HasAnyPrivilege(ctx, roleID, codes...)` | Returns `true` if the role has **any** of the specified privilege codes. Useful for OR-checks. |
+| `SetNewRolePrivileges(ctx, roleID, privileges)` | Sets/overrides the cached privileges for a role (used during setup/testing). Does **not** persist to DB. |
+| `DeleteRolePrivileges(ctx, roleID)` | Deletes the privilege cache for a role. Will force a refresh from your DB on next access. |
+
+> 🔁 All methods auto-refresh from DB if privileges are missing from cache.
 
 ## 🛡️ Checking Privileges in Your Handlers
 Once you’ve injected RBAC context using InjectContext, you can retrieve and use the privileges easily:
@@ -261,12 +283,13 @@ func (s *YourService) GetData(ctx context.Context) error {
 
 ### ✅ Built-in Context Helpers:
 
-| Function                                 | Purpose                                     |
-|------------------------------------------|---------------------------------------------|
-| `rbac.GetPrivilegesFromContext(ctx)`     | Returns map of granted privileges           |
-| `rbac.HasPrivilegeInContext(ctx, code)`  | Shorthand to check a specific privilege     |
-| `rbac.GetUserIDFromContext(ctx)`         | Retrieve user ID from context               |
-| `rbac.GetRoleIDFromContext(ctx)`         | Retrieve role ID from context               |
+| Function                                              | Purpose                                                          |
+|-------------------------------------------------------|------------------------------------------------------------------|
+| `rbac.GetPrivilegesFromContext(ctx)`                  | Returns map of granted privileges from context                  |
+| `rbac.HasPrivilegeInContext(ctx, code)`               | Shorthand to check if a specific privilege exists in context    |
+| `rbac.GetUserIDFromContext(ctx)`                      | Retrieves user ID from context (if injected earlier)            |
+| `rbac.GetRoleIDFromContext(ctx)`                      | Retrieves role ID from context (if injected earlier)            |
+| `rbac.InjectContext(ctx, roleID, userID, privileges)` | Injects role ID, user ID, and privileges into request context   |
 
 ## 🧪 Example: Run Locally
 ### Step 1: Clone and run the example
@@ -312,9 +335,3 @@ CREATE TABLE role_privileges (
 );
 ```
 Or define your own structure by implementing PrivilegeRepository.
-
-## 🧰 Built-in Helpers
-- InjectContext(ctx, roleID, userID, privileges)
-- GetPrivilegesFromContext(ctx)
-- HasPrivilegeInContext(ctx, "priv-code")
-- PrivilegeRepository ⭐️ (interface to support custom backends)
