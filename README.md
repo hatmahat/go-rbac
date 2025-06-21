@@ -1,4 +1,5 @@
 # go-rbac
+[![Go Reference](https://pkg.go.dev/badge/github.com/hatmahat/go-rbac.svg)](https://pkg.go.dev/github.com/hatmahat/go-rbac)
 
 A lightweight, framework-agnostic **Role-Based Access Control (RBAC)** library for Go, built with:
 
