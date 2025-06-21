@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/hatmahat/go-rbac/rbac"
+	"github.com/hatmahat/go-rbac/rbacgorm"
 	"github.com/labstack/echo/v4"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -33,10 +34,10 @@ func main() {
 	seedData(db)
 
 	// ✅ Create the GORM-based privilege repository
-	privRepo := rbac.NewGormPrivilegeRepository(db)
+	privRepo := rbacgorm.NewGormPrivilegeRepository(db)
 
 	// 2. Initialize RBAC service with 1-minute auto-refresh
-	rbacService := rbac.NewRBACService(privRepo, 1*time.Minute)
+	rbacService := rbac.NewRBACService(privRepo, 1*time.Minute, rbac.NewConsoleLogger())
 
 	// 3. Setup Echo
 	e := echo.New()

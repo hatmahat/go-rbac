@@ -3,8 +3,6 @@ package rbac
 import (
 	"context"
 	"time"
-
-	logger "github.com/hatmahat/go-rbac/logger"
 )
 
 type RBACService interface {
@@ -16,23 +14,29 @@ type RBACService interface {
 }
 
 type rbacService struct {
-	repo  PrivilegeRepository // decoupled abstraction
-	cache *RolePrivilegesCache
+	repo   PrivilegeRepository // decoupled abstraction
+	cache  *RolePrivilegesCache
+	logger Logger
 }
 
 // NewRBACService creates a new RBAC service
-func NewRBACService(repo PrivilegeRepository, refreshInterval time.Duration) RBACService {
-	service := &rbacService{
-		repo:  repo,
-		cache: NewRolePrivilegesCache(),
+func NewRBACService(repo PrivilegeRepository, refreshInterval time.Duration, logger Logger) RBACService {
+	if logger == nil {
+		logger = NewNullLogger()
+	}
+
+	svc := &rbacService{
+		repo:   repo,
+		cache:  NewRolePrivilegesCache(),
+		logger: logger,
 	}
 
 	// Start periodic refresh if interval is greater than 0
 	if refreshInterval > 0 {
-		go service.startPeriodicRefresh(refreshInterval)
+		go svc.startPeriodicRefresh(refreshInterval)
 	}
 
-	return service
+	return svc
 }
 
 // loadRolePrivileges loads the privileges for a given role ID from the database
@@ -64,10 +68,7 @@ func (s *rbacService) startPeriodicRefresh(interval time.Duration) {
 			_, err := s.loadRolePrivileges(ctx, roleID)
 			if err != nil {
 				// Log error but continue with other roles
-				logger.Errorw("Error refreshing privileges for role",
-					"error", err.Error(),
-					"roleID", roleID,
-				)
+				s.logger.Errorf("Error refreshing privileges for role %s: %v", roleID, err)
 			}
 		}
 	}

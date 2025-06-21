@@ -42,16 +42,87 @@ go-rbac/
 
 ## 🚀 Quick Start 
 ### Step 1: Implement your own PrivilegeRepository
-Use the built-in GORM repo:
+#### Option A: Use the built-in GORM implementation 
 ```go
+import (
+	"time"
+
+	"github.com/hatmahat/go-rbac/rbac"
+)
+
 repo := rbac.NewGormPrivilegeRepository(db)
-rbacService := rbac.NewRBACService(repo, 5*time.Minute)
+rbacService := rbac.NewRBACService(repo, 5*time.Minute, rbac.NewConsoleLogger()) // optional logger
 ```
-Or create your own:
+#### Option B: Create your own repository (e.g. using database/sql)
 ```go
-type MyRepo struct{}
-func (m *MyRepo) FetchPrivilegesByRoleID(ctx context.Context, roleID string) (map[string]bool, error) {
-	return map[string]bool{"read:compliance": true}, nil // mock or custom DB logic
+package myrepo
+
+import (
+	"context"
+	"database/sql"
+	"fmt"
+)
+
+type SQLPrivilegeRepository struct {
+	db *sql.DB
+}
+
+func NewRepo(db *sql.DB) *SQLPrivilegeRepository {
+	return &SQLPrivilegeRepository{db: db}
+}
+
+func (r *SQLPrivilegeRepository) FetchPrivilegesByRoleID(ctx context.Context, roleID string) (map[string]bool, error) {
+	const query = `
+		SELECT p.code
+		FROM privileges p
+		JOIN role_privileges rp ON p.id = rp.privilege_id
+		WHERE rp.role_id = $1
+	`
+
+	rows, err := r.db.QueryContext(ctx, query, roleID)
+	if err != nil {
+		return nil, fmt.Errorf("query failed: %w", err)
+	}
+	defer rows.Close()
+
+	privMap := make(map[string]bool)
+	for rows.Next() {
+		var code string
+		if err := rows.Scan(&code); err != nil {
+			return nil, fmt.Errorf("scan failed: %w", err)
+		}
+		privMap[code] = true
+	}
+
+	return privMap, nil
+}
+```
+Using your repo in main.go
+```go
+package main
+
+import (
+	"database/sql"
+	"log"
+	"time"
+
+	_ "github.com/lib/pq"
+	"github.com/hatmahat/go-rbac/rbac"
+	"your_project/myrepo"
+)
+
+func main() {
+	db, err := sql.Open("postgres", "postgres://user:pass@localhost/dbname?sslmode=disable")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	repo := myrepo.NewRepo(db)
+
+	// Optional: use NewConsoleLogger() for dev or NewNullLogger() for silence
+	rbacService := rbac.NewRBACService(repo, 5*time.Minute, rbac.NewConsoleLogger())
+
+	// Use rbacService in your middleware, handlers, etc.
 }
 ```
 ### Step 2: Inject into context 
