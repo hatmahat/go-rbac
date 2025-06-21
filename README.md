@@ -3,10 +3,10 @@
 
 A lightweight, framework-agnostic **Role-Based Access Control (RBAC)** library for Go, built with:
 
-- ✅ Context-based privilege injection
-- ✅ In-memory caching for fast access
-- ✅ Optional auto-refresh of role privileges
-- ✅ Minimal dependency (works with any HTTP framework or DB driver)
+- Context-based privilege injection
+- In-memory caching for fast access
+- Optional auto-refresh of role privileges
+- Minimal dependency (works with any HTTP framework or DB driver)
 
 ---
 
@@ -20,13 +20,13 @@ A lightweight, framework-agnostic **Role-Based Access Control (RBAC)** library f
 
 ---
 
-## 📦 Installation
+## Installation
 
 ```bash
 go get github.com/hatmahat/go-rbac
 ```
 
-## 🧱 Folder Structure
+## Folder Structure
 ```
 go-rbac/
 ├── example/                    # Minimal usage example using Echo
@@ -41,7 +41,7 @@ go-rbac/
 ├── rbacgorm/                   # Optional GORM-based implementation
 │   └── gorm_repository.go
 ```
-## 🔐 RBAC Model: Privileges, Roles, and Users
+## RBAC Model: Privileges, Roles, and Users
 
 This library uses a minimal and flexible RBAC (Role-Based Access Control) model based on three key entities:
 
@@ -53,7 +53,7 @@ This library uses a minimal and flexible RBAC (Role-Based Access Control) model 
 
 ---
 
-### 🔄 How it works
+### How it works
 
 - A **Privilege** is a string like `read:compliance`, `delete:report`, etc.
 - A **Role** (e.g., `admin`, `viewer`) contains a list of such privilege codes.
@@ -70,7 +70,7 @@ You can use any privilege naming convention (e.g., read:users, manage:projects, 
 The system treats them as simple string lookups for fast in-memory evaluation.
 
 
-## 🚀 Quick Start 
+## Quick Start 
 ### Step 1: Implement your own PrivilegeRepository
 #### Option A: Use the built-in GORM implementation 
 ```go
@@ -158,7 +158,7 @@ func main() {
 ### Step 2: Inject into context 
 #### Examples
 
-#### ✅ 1. Echo
+#### 1. Echo
 ```go
 e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
     return func(c echo.Context) error {
@@ -177,7 +177,7 @@ e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 })
 ```
 
-#### ✅ 2. Gin
+#### 2. Gin
 ```go
 r.Use(func(c *gin.Context) {
     roleID := c.GetHeader("X-Role-ID")
@@ -195,7 +195,7 @@ r.Use(func(c *gin.Context) {
 })
 ```
 
-#### ✅ 3. Chi
+#### 3. Chi
 ```go
 r.Use(func(next http.Handler) http.Handler {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -214,7 +214,7 @@ r.Use(func(next http.Handler) http.Handler {
 })
 ```
 
-#### ✅ 4. Fiber
+#### 4. Fiber
 ```go
 app.Use(func(c *fiber.Ctx) error {
     roleID := c.Get("X-Role-ID")
@@ -230,7 +230,7 @@ app.Use(func(c *fiber.Ctx) error {
     return c.Next()
 })
 ```
-### 🧠 About RBACService
+### About RBACService
 
 The core `RBACService` handles:
 - In-memory caching of privileges per role
@@ -238,7 +238,7 @@ The core `RBACService` handles:
 - Fast lookups with `HasPrivilege`, `HasAnyPrivilege`, etc.
 
 You don't need to manage caching or database access manually — just implement `PrivilegeRepository` and call `NewRBACService(...)`.
-### 🧠 RBACService Interface
+### RBACService Interface
 
 The `RBACService` is the core entry point for working with roles and privileges. It provides cache-aware methods for checking access and managing privilege data:
 
@@ -250,9 +250,9 @@ The `RBACService` is the core entry point for working with roles and privileges.
 | `SetNewRolePrivileges(ctx, roleID, privileges)` | Sets/overrides the cached privileges for a role (used during setup/testing). Does **not** persist to DB. |
 | `DeleteRolePrivileges(ctx, roleID)` | Deletes the privilege cache for a role. Will force a refresh from your DB on next access. |
 
-> 🔁 All methods auto-refresh from DB if privileges are missing from cache.
+> All methods auto-refresh from DB if privileges are missing from cache.
 
-## 🛡️ Checking Privileges in Your Handlers
+## Checking Privileges in Your Handlers
 Once you’ve injected RBAC context using InjectContext, you can retrieve and use the privileges easily:
 ```go
 ctx := c.Request().Context()
@@ -267,7 +267,7 @@ return c.JSON(http.StatusOK, map[string]string{
     "message": fmt.Sprintf("Hello user %s! You have access.", userID),
 })
 ```
-### 🔁 Example in Business Logic Layer (Service)
+### Example in Business Logic Layer (Service)
 ```go
 func (s *YourService) GetData(ctx context.Context) error {
     if !rbac.HasPrivilegeInContext(ctx, "read:data") {
@@ -282,7 +282,7 @@ func (s *YourService) GetData(ctx context.Context) error {
 ```
 
 
-### ✅ Built-in Context Helpers:
+### Built-in Context Helpers:
 
 | Function                                              | Purpose                                                          |
 |-------------------------------------------------------|------------------------------------------------------------------|
@@ -300,7 +300,7 @@ cd go-rbac/example
 go run main.go
 ```
 ### Step 2: Test access
-#### ✅ Role with Access
+#### Role with Access
 ```bash
 curl -H "X-Role-ID: admin" -H "X-User-ID: 123" http://localhost:8080/compliance
 ```
