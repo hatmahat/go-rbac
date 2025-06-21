@@ -27,18 +27,46 @@ go get github.com/hatmahat/go-rbac
 ## 🧱 Folder Structure
 ```
 go-rbac/
-├── rbac/                       # Core RBAC logic (framework-agnostic)
-│   ├── cache.go
-│   ├── context.go
-│   ├── context_injector.go
-│   ├── service.go
-│   ├── privilege_repository.go ⭐️ Interface for your own DB logic
-│   └── gorm_repository.go      ⭐️ GORM-based default implementation (optional)
-├── example/                    # Minimal example using Echo
+├── example/                    # Minimal usage example using Echo
 │   └── main.go
-├── go.mod
-└── README.md
+├── rbac/                       # Core RBAC logic (framework-agnostic)
+│   ├── cache.go                # In-memory cache for role privileges
+│   ├── context.go              # Context keys and access helpers
+│   ├── injector.go             # Inject privileges into context
+│   ├── logger.go               # Optional logger (Console or Null)
+│   ├── privilege_repository.go # Interface for custom DB repositories ⭐️
+│   └── service.go              # Main RBAC service logic
+├── rbacgorm/                   # Optional GORM-based implementation
+│   └── gorm_repository.go
 ```
+## 🔐 RBAC Model: Privileges, Roles, and Users
+
+This library uses a minimal and flexible RBAC (Role-Based Access Control) model based on three key entities:
+
+| Type      | Description                                      | Example           |
+|-----------|--------------------------------------------------|-------------------|
+| Privilege | A string that defines a specific permission code | `read:users`      |
+| Role      | A group of privileges assigned to a category     | `admin`           |
+| User      | Assigned one or more roles to determine access   | user `123` with role `viewer` |
+
+---
+
+### 🔄 How it works
+
+- A **Privilege** is a string like `read:compliance`, `delete:report`, etc.
+- A **Role** (e.g., `admin`, `viewer`) contains a list of such privilege codes.
+- A **User** is associated with a role — usually passed in JWT claims or request headers like `X-Role-ID`.
+- At runtime, the role’s privileges are injected into the request `context.Context`.
+- You can check access easily with helpers like:
+
+```go
+if !rbac.HasPrivilegeInContext(ctx, "read:compliance") {
+    return errors.New("forbidden")
+}
+```
+You can use any privilege naming convention (e.g., read:users, manage:projects, export:data).
+The system treats them as simple string lookups for fast in-memory evaluation.
+
 
 ## 🚀 Quick Start 
 ### Step 1: Implement your own PrivilegeRepository
