@@ -1,3 +1,8 @@
+//go:build ignore
+// +build ignore
+
+// Package go-rbac provides core RBAC interfaces and usage patterns.
+// This is a placeholder to make pkg.go.dev index the root package.
 package main
 
 import (
