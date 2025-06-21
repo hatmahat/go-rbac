@@ -1,3 +1,8 @@
+> **Disclaimer:**  
+> I originally wrote this library for a specific internal project.  
+> Later, I refactored and packaged it as a standalone module with the help of LLMs
+> to improve the structure and documentation for reuse and open source sharing.
+
 # go-rbac
 [![Go Reference](https://pkg.go.dev/badge/github.com/hatmahat/go-rbac.svg)](https://pkg.go.dev/github.com/hatmahat/go-rbac)
 
